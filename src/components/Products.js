@@ -1,32 +1,52 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
+import { fetchProducts } from '../actions/productActions';
 import formatCurrency from '../util';
 
 const Products = (props) => {
+  const { products, addToCart, fetchProducts } = props;
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
   return (
     <div>
-      <ul className="products">
-        {props.products.map((product) => (
-          <li key={product._id}>
-            <div className="product">
-              <a href={'#' + product._id}>
-                <img src={product.image} alt="product_image"></img>
-                <p>{product.title}</p>
-              </a>
-              <div className="product-price">
-                <div>{formatCurrency(product.price)}</div>
-                <button
-                  onClick={() => props.addToCart(product)}
-                  className="button primary"
-                >
-                  Add to Cart
-                </button>
+      {products && products.length === 0 ? (
+        <div>No products found.</div>
+      ) : (
+        <ul className="products">
+          {products.map((product) => (
+            <li key={product._id}>
+              <div className="product">
+                <a href={'#' + product._id}>
+                  <img src={product.image} alt="product_image" />
+                  <p>{product.title}</p>
+                </a>
+                <div className="product-price">
+                  <div>{formatCurrency(product.price)}</div>
+                  <button
+                    onClick={() => addToCart(product)}
+                    className="button primary"
+                  >
+                    Add to Cart
+                  </button>
+                </div>
               </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
 
-export default Products;
+const mapStateToProps = (state) => ({
+  products: state.products.items,
+});
+
+const mapDispatchToProps = {
+  fetchProducts,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Products);
