@@ -1,31 +1,63 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import {
+  fetchProducts,
+  filterProducts,
+  sortProducts,
+} from '../actions/productActions';
 
 const Filter = (props) => {
+  const { products, size, sort, filterProducts, sortProducts } = props;
+
   return (
-    <div className="filter">
-      <div className="filter-result">{props.count}</div>
-      <div className="filter-sort">
-        Order{' '}
-        <select value={props.sort} onChange={props.sortProducts}>
-          <option>Latest</option>
-          <option value="lowest">Lowest</option>
-          <option value="highest">Highest</option>
-        </select>
-      </div>
-      <div className="filter-size">
-        Filter{' '}
-        <select value={props.size} onChange={props.filterProducts}>
-          <option value="">ALL</option>
-          <option value="XS">XS</option>
-          <option value="S">S</option>
-          <option value="M">M</option>
-          <option value="L">L</option>
-          <option value="XL">XL</option>
-          <option value="XXL">XXL</option>
-        </select>
-      </div>
-    </div>
+    <>
+      {!products ? (
+        <div>Loading...</div>
+      ) : (
+        <div className="filter">
+          <div className="filter-result">{products.length}</div>
+          <div className="filter-sort">
+            Order{' '}
+            <select
+              value={sort}
+              onChange={(e) => sortProducts(products, e.target.value)}
+            >
+              <option value={"latest"}>Latest</option>
+              <option value="lowest">Lowest</option>
+              <option value="highest">Highest</option>
+            </select>
+          </div>
+          <div className="filter-size">
+            Filter{' '}
+            <select
+              value={size}
+              onChange={(e) => filterProducts(products, e.target.value)}
+            >
+              <option value="">ALL</option>
+              <option value="XS">XS</option>
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+              <option value="XXL">XXL</option>
+            </select>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
-export default Filter;
+const mapStateToProps = (state) => ({
+  size: state.products.size,
+  sort: state.products.sort,
+  products: state.products.items,
+});
+
+const mapDispatchToProps = {
+  fetchProducts,
+  filterProducts,
+  sortProducts,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Filter);

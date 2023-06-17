@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { fetchProducts } from '../actions/productActions';
 import formatCurrency from '../util';
+import { addToCart } from '../actions/cartActions';
 
 const Products = (props) => {
   const { products, addToCart, fetchProducts } = props;
@@ -12,7 +13,7 @@ const Products = (props) => {
 
   return (
     <div>
-      {products && products.length === 0 ? (
+      {!products || products.length === 0 ? (
         <div>No products found.</div>
       ) : (
         <ul className="products">
@@ -42,11 +43,12 @@ const Products = (props) => {
 };
 
 const mapStateToProps = (state) => ({
-  products: state.products.items,
+  products: state.products.filteredItems,
 });
 
 const mapDispatchToProps = {
   fetchProducts,
+  addToCart
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Products);

@@ -1,3 +1,7 @@
-export default function formatCurrency(num){
-    return "$" + Number(num.toFixed(1)).toLocaleString() + "";
+export default function formatCurrency(num) {
+  if (typeof num !== 'number' || isNaN(num)) {
+    return '';
+  }
+
+  return '$' + num.toFixed(1).toLocaleString() + '';
 }

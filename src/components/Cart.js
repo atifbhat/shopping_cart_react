@@ -1,13 +1,26 @@
 import React, { useState } from 'react';
 import formatCurrency from '../util';
+import { connect } from 'react-redux';
+import { removeFromCart } from '../actions/cartActions';
+import { createOrder, clearOrder } from '../actions/orderActions';
+
+import { Modal, Button } from 'react-bootstrap';
 
 const Cart = (props) => {
-  console.log(props);
   const [checkout, setCheckout] = useState(false);
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const { cartItems, removeFromCart } = props;
+  const { cartItems, order, removeFromCart, createOrder } = props;
+  const [showModal, setShowModal] = useState(false);
+
+  const handleClose = () => {
+    setShowModal(false);
+  };
+
+  const handleShow = () => {
+    setShowModal(true);
+  };
 
   if (!Array.isArray(cartItems)) {
     return <div>Loading cart items...</div>;
@@ -32,12 +45,10 @@ const Cart = (props) => {
       email,
       address,
       cartItems,
+      total: cartItems.reduce((a, c) => a + c.price * c.count, 0),
     };
-    // TODO: Handle submitting the order data
-    console.log(order);
     props.createOrder(order);
-    
-    
+    handleShow();
   };
 
   return (
@@ -50,19 +61,71 @@ const Cart = (props) => {
         </div>
       )}
 
+      {order && (
+        <Modal show={showModal} onHide={handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Order Confirmation</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="order-details">
+              <h3 className="success-message">
+                Your order has been placed successfully
+              </h3>
+              <h2>Order ID: {order._id}</h2>
+              <ul>
+                <li>
+                  <div>Name:</div>
+                  <div>{order.name}</div>
+                </li>
+                <li>
+                  <div>Email:</div>
+                  <div>{order.email}</div>
+                </li>
+                <li>
+                  <div>Address:</div>
+                  <div>{order.address}</div>
+                </li>
+                <li>
+                  <div>Total:</div>
+                  <div>{formatCurrency(order.total)}</div>
+                </li>
+                <li>
+                  <div>Cart Items:</div>
+                  <div>
+                    {order.cartItems.map((x) => (
+                      <div key={x._id}>
+                        {x.count} x {x.title}
+                      </div>
+                    ))}
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
+
       <div className="cart">
         <ul className="cart-items">
           {cartItems.map((item) => (
             <li key={item._id}>
               <div>
-                <img src={item.image} alt={item.title}></img>
+                <img src={item.image} alt={item.title} />
               </div>
 
               <div>{item.title}</div>
 
               <div className="right">
                 {formatCurrency(item.price)} * {item.count}{' '}
-                <button className="button" onClick={() => removeFromCart(item)}>
+                <button
+                  className="button"
+                  onClick={() => removeFromCart(item)}
+                >
                   Remove
                 </button>
               </div>
@@ -122,7 +185,7 @@ const Cart = (props) => {
                     />
                   </li>
                   <li>
-                    <button  className="button primary" type="submit">
+                    <button className="button primary" type="submit">
                       Place Order
                     </button>
                   </li>
@@ -136,4 +199,15 @@ const Cart = (props) => {
   );
 };
 
-export default Cart;
+const mapStateToProps = (state) => ({
+  cartItems: state.cart.cartItems,
+  order: state.order.order,
+});
+
+const mapDispatchToProps = {
+  removeFromCart,
+  createOrder,
+  clearOrder,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Cart);
